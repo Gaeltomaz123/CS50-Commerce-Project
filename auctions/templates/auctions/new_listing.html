@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>New Auction Listing</h2>
+    <div style="max-width: 50em;">
+        {% if message %}
+            <div class="alert alert-success" role="alert">
+                Your listing has been successfully added!
+            </div>
+        {% endif %}
+        <form action="{% url 'new_listing' %}" method="post">
+            {% csrf_token %}
+            {{ auction_form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
+    </div>
+{% endblock %}

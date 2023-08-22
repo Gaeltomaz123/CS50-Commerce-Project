@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    <div class="row row-cols-1 row-cols-md-6 g-4">
+    {% for auction in object_list %}
+        <div class="col" style="padding-top: 10px; padding-bottom: 10px;">
+          <div class="card h-100">
+              <img src="{{ auction.image_URL }}" class="card-img-top" height="320px">
+            <div class="card-body">
+              <h5 class="card-title">
+                <a href="{% url 'listing_page' auction.slug %}">{{ auction.title }}</a>
+              </h5>
+              <p class="card-text">{{ auction.description }}</p>
+            </div>
+            {% if auction.is_active %}
+            <div class="alert alert-success" role="alert" style="width: 120px;">
+              Active
+            </div>
+            {% else %}
+              <div class="alert alert-danger" role="alert" style="width: 120px;">
+                Innactive
+              </div>
+            {% endif %}
+            <div style="padding-left: 20px;">
+              {% if auction.current_bid_validate == None %}
+                <h4>Price: ${{ auction.starting_bid }}</h4>
+              {% else %}
+                <h4>Price: ${{ auction.current_bid_validate }}</h4>
+              {% endif %}
+            </div>    
+            <div class="card-footer">
+              <small class="text-muted">Created {{ auction.created }}</small>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}

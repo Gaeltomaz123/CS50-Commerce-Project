@@ -1,0 +1,99 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div style="display: flex; align-items: flex-start; margin-bottom: 10px;">
+        <h2>Listing: {{ listing.title }}</h2>
+        {% if user.is_authenticated and listing.is_active %}
+            {% if listing.author == user %}
+                <a  href="{% url 'close_listing' listing.slug %}" style="margin-left: 20px;" class="btn btn-success">Close</a>
+            {% else %}
+                {% if it_is %}
+                <a href="{% url 'watchlist_remove' listing.slug %}" style="margin-left: 20px;" class="btn btn-danger">Remove from watchlist</a>
+                {% else %}
+                <a href="{% url 'watchlist_add' listing.slug %}" style="margin-left: 20px;" class="btn btn-primary">Add to watchlist</a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+    {% if listing.is_active %}
+        <div class="alert alert-success" role="alert" style="max-width: 5.5em;">
+            Active
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert" style="max-width: 7em;">
+            Innactive
+        </div>
+    {% endif %}
+    <div style="display: flex; margin-bottom: 10px;">
+        <div>
+            <img src="{{ listing.image_URL }}" height="500px" width="500px">
+        </div>
+        <div style="margin-left: 20px;">
+            <h1>Description:</h1>
+            <h6 style="color: #4d4d4d; width: 60%;">{{ listing.description }}</h6>
+            {% if listing.current_bid_validate == None %}
+                <h1 style="margin-top: 20px;">Price: <strong style="color: #318336;">$</strong>{{ listing.starting_bid }}</h1>
+            {% else %}
+                <h1 style="margin-top: 20px;">Price: <strong style="color: #318336;">$</strong>{{ listing.current_bid_validate }}</h1>
+            {% endif %}
+            {% if invalid_value %}
+                <div style="max-width: 30em;" class="alert alert-danger" role="alert">
+                    Your bid must be higher than the current one!
+                </div>
+            {% endif %}
+            {% if invalid_user %}
+                <div style="max-width: 30em;" class="alert alert-warning" role="alert">
+                    You cannot bid in your own listing!
+                </div>
+            {% endif %}
+            {% if not listing.is_active and user == listing.winner %}
+                <div style="max-width: 30em;" class="alert alert-success" role="alert">
+                    Congratulations! You've won the auction
+                </div>
+            {% endif %}
+            {% if sold %}
+                <div style="max-width: 30em;" class="alert alert-danger" role="alert">
+                    This listing was already sold!
+                </div>
+            {% endif %}
+            {% if listing.current_user_bid == user %}
+                <h6 style="color: #4d4d4d; margin-top: 30px;">{{ listing.bids.count }} bid(s) so far. Your bid is the current bid.</h6>
+            {% else %}
+                <h6 style="color: #4d4d4d; margin-top: 30px;">{{ listing.bids.count }} bid(s) so far</h6>
+            {% endif %}
+            <form action="{% url 'bids' listing.slug %}" method="post" style="max-width: 30em;">
+                {% csrf_token %}
+                <div style="margin-bottom: 20px;">
+                    {{ bid.current_bid }}
+                    <input class="btn btn-primary" type="submit" value="Place Bid" style="margin-top: 10px; margin-bottom: 10px;">
+                </div>
+            </form>
+            <h3>Details</h3>
+            <ul>
+                <li>Listed by: <strong>{{ listing.author }}</strong></li>
+                <li>Category: <strong>{{ listing.auction_category }}</strong></li>
+            </ul>
+        </div>
+    </div>
+    <form action="{% url 'comment' listing.slug %}" method="post">
+        {% csrf_token %}
+        <div style="width: 70vmin;">
+            {{ comment_form.text }}
+            <input class="btn btn-primary" type="submit" value="Submit" style="margin-top: 10px; margin-bottom: 10px;">
+        </div>
+    </form>
+    <h3>Comments ({{ listing.comments.count }})</h3>
+    {% if not listing.comments.all %}
+        No comments yet
+    {% else %}
+        {% for c in listing.comments.all %}
+            <div style="width:500px; border: 1px solid #c7c8c8; padding-left: 10px; padding-right: 10px; padding-bottom: 5px; border-radius: 0.25rem; margin-bottom: 10px;">
+                <strong>{{ c.user }}</strong> - <small class="text-muted">{{ c.created }}</small>
+                <br>
+                <div align="justify">
+                    <small><em>- {{ c.text }}</em></small>
+                </div>
+            </div> 
+        {% endfor %}   
+    {% endif %}
+{% endblock %}
